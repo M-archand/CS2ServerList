@@ -1,12 +1,11 @@
-﻿using System.Net;
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Runtime.InteropServices;
 
 namespace Plugin;
 
@@ -16,13 +15,13 @@ public sealed partial class Plugin : BasePlugin, IPluginConfig<PluginConfig>
     public override string ModuleVersion => "1.0.1";
     public override string ModuleAuthor => "Wohaho";
 
-    public PluginConfig? Config { get; set; } =
+    public PluginConfig Config { get; set; } = new();
 
     private string API_END = "https://cs2serverlist.com/api";
     private bool isRequestInProgress = false;
     private DateTime lastRequestTime;
     private TimeSpan requestCooldown = TimeSpan.FromSeconds(5); // Added cooldown time
-    private HttpClient? httpClient;
+    private readonly HttpClient httpClient = new();
     private delegate nint CNetworkSystem_UpdatePublicIp(nint networkSystem);
     private CNetworkSystem_UpdatePublicIp? _networkSystemUpdatePublicIp;
     private bool isWarmupRound = false;
@@ -58,7 +57,6 @@ public sealed partial class Plugin : BasePlugin, IPluginConfig<PluginConfig>
     public override void Load(bool hotReload)
     {
         // Initialize HttpClient with minimal headers to avoid bot detection
-        httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
         
         var networkSystem = NativeAPI.GetValveInterface(0, "NetworkSystemVersion001");
@@ -411,7 +409,7 @@ public sealed partial class Plugin : BasePlugin, IPluginConfig<PluginConfig>
         // For specific player events, check if we can make a request now,server_unload
         if (specificPlayer != null && eventType != "rounds_end" && eventType != "server_unload" && !CanMakeRequest())
         {
-            Logger.LogInformation($"Request skipped for {eventType}: Another request is in progress or cooldown period not elapsed");
+            //Logger.LogInformation($"Request skipped for {eventType}: Another request is in progress or cooldown period not elapsed");
             return;
         }
 
@@ -527,7 +525,7 @@ public sealed partial class Plugin : BasePlugin, IPluginConfig<PluginConfig>
             }
             else
             {
-                Logger.LogInformation($"Successfully sent {playerDataList.Count} player records for event: {eventType}");
+                //Logger.LogInformation($"Successfully sent {playerDataList.Count} player records for event: {eventType}");
 
                 // Reset stats after successful API send if it's a round end or team change event
                 if (eventType == "rounds_end" || eventType == "player_team_change" || eventType == "server_unload")
